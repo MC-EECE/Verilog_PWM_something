@@ -1,20 +1,19 @@
-module PWM_core #(parameter n = 10, parameter m = 4)( 
+module PWM_core( 
 input reset, clk,
-input [n-2:0] dutyc_switch,
-input [n-1:0] period,
-input [m-1:0] compare_result,
- output reg out,
- output reg scope
+input [8:0] dutyc_switch,	//Pulse Width
+input [8:0] period,
+output reg out
 );
 
 
-reg [n-2:0] duty_cycle, counter;
+reg [8:0] duty_cycle, counter;
+reg [3:0] compare_result = 4'b1111;
+
 
 
 always@(posedge clk or negedge reset) //Activating hardware at rising edge of clock or falling edge of reset
 begin
-	
-	
+
    if(~reset) //checking for reset signal (reset driven low)
 		begin
 			counter <= 32'b1; 		//assigning 32 "ones" to the counter
@@ -28,8 +27,8 @@ begin
 	
 	else 
 		begin
-			counter <= counter + 1'b1;														//Incrementing counter, counting
-			if(compare_result[0]) duty_cycle[7:0] <= dutyc_switch[7:0];
+			counter <= counter + 1'b1;					//Incrementing Counter									//Incrementing counter, counting
+			if(compare_result[0]) duty_cycle[7:0] <= dutyc_switch[7:0];	//Loading pulse width
 
 		end
 	
@@ -38,16 +37,16 @@ end
 
 always@(posedge clk)				//Activating hardware at rising edge of clock
 begin
+
 	if(counter <= duty_cycle)	//checking if counter is less than or equal to duty_cycle
 		begin
 		out = 1'b1;					//if counter is less than or equal to duty_cycle, output 1
-		scope = 1'b1;
 		end
 	else 
 		begin
 		out = 1'b0;					//if counter is not less than or equal to duty_cycle, output 0
-		scope = 1'b0;
 		end
+
 end
 
 endmodule
